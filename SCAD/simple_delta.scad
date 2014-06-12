@@ -11,7 +11,7 @@ $fn = 48;
 
 //render_part(9);
 
-//plates(3);
+plates(1);
 
 magnet_mounts = true;
 
@@ -92,9 +92,9 @@ module render_part(part_to_render) {
 }
 
 // printer dims
-r_printer = 203.5; // radius of the printer - typically 175; 203.5 yields exact same geometry with 12" Al rod and 3/8" bearing
-l_tie_rod = 312.477; // length of the tie rods - typically 250; with 12" Al rod + 3/8" bearing = 312.477
-l_guide_rods = 300; // length of the guide rods - only used for assembly
+r_printer = 201.7178; // radius of the printer - typically 175; 203.5 yields exact same geometry with 12" Al rod and 3/8" bearing; effective radius - 203.5:156.5; 204:157; 
+l_tie_rod = 309.51; // length of the tie rods - typically 250; with 12" Al rod + 3/8" bearing = 312.477
+l_guide_rods = 595; // length of the guide rods - only used for assembly
 
 // belt, pulley and idler dims
 od_idler = od_608; // idler OD
@@ -135,6 +135,7 @@ l_chord_pivots = 2 * r_mount_pivot * sin(a_sep_mounts / 2); // chord length betw
 
 // remove enough material from mount so that a logical length board can be cut to ensure adjacent mount pivot point chord lengths will yield a printer having r_printer
 l_brd = floor(l_chord_pivots / 10) * 10 - l_mount / 2; // length of the board that will be mounted between the apexs to yield r_printer
+//l_brd = l_chord_pivots - l_mount / 2; // length of the board that will be mounted between the apexs to yield r_printer
 l_pad_mount = (l_chord_pivots - l_brd) / 2;
 l_boss_mount = l_mount - l_pad_mount;
 
