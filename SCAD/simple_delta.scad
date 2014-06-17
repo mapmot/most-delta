@@ -11,7 +11,84 @@ $fn = 48;
 
 //render_part(9);
 
-plates(1);
+//plates(1);
+
+assembly(r_printer-54.4,r_tower_center+0.1);
+
+module idler() {
+		translate([(d_pulley - od_idler) / 2, 0, 0])
+			rotate([90, 0, 0])
+					cylinder(r = od_idler / 2, h = h_idler, center = true);
+
+}
+
+module pulley() {
+			translate([0, w_idler_relief, (l_NEMA17 - t_clamp) / 2])
+				rotate([90, 0, 0])
+					NEMA17_parallel_holes(
+						height = w_clamp - w_idler_relief + 2,
+						l_slot = 0,
+						d_collar = d_pulley);
+
+}
+
+module belt() {
+	cube([1,6,l_guide_rods]);
+}
+
+module assembly(b_printer,a_printer) {
+	echo(str("Imaginary board radius = ", b_printer));
+	echo(str("Imaginary apex radius = ", a_printer));
+	color("blue") circle(r_printer);
+	for (i = [0:2]) {
+			
+		translate([0, a_printer+8, l_guide_rods / 2])
+		translate([-d_pulley / 2, y_web, t_carriage / 2 - d_M3_screw / 2 - 5])
+		rotate([90, 0, 0])
+				terminator(l_pass = 10, flag = 0, mount = 1, magnet=false);
+		
+		rotate([0, 180, i * 120])
+		translate([0, a_printer, -l_guide_rods / 2])
+			carriage(dogged = false, magnet_mounts = magnet_mounts, stage_mounts = false);
+		
+		rotate([0, 180, i * 120])
+		translate([0, a_printer, -t_clamp/2])
+			end_motor();
+
+		rotate([0, 180, i * 120])
+		translate([0, a_printer-15, -t_clamp/2])
+			color("red") pulley();
+
+		rotate([0, 180, i * 120])
+		translate([d_pulley/2, a_printer, -t_clamp/2 - l_guide_rods])
+			color("green") belt();
+
+		rotate([0, 180, i * 120])
+		translate([0, a_printer, -t_clamp/2 - l_guide_rods])
+			end_idler();
+		
+		rotate([0, 180, i * 120])
+		translate([0, a_printer, -t_clamp/2 - l_guide_rods])
+			color("red") idler();
+		
+		rotate([0, 180, i * 120])
+		translate([0, a_printer, -t_clamp/2 - l_guide_rods])
+			for (i = [-1, 1])
+				translate([i * cc_guides / 2, 0, 0]) {
+					translate([0, 0, 5])
+						cylinder(d = d_guides, h = l_guide_rods);
+				}
+
+		rotate([0, 0, i * 120])
+		translate([-l_brd/2,-b_printer,0])
+			cube([l_brd, w_mount, t_clamp]);
+		
+		rotate([0, 0, i * 120])
+		translate([-l_brd/2,-b_printer,l_guide_rods])
+			cube([l_brd, w_mount, t_clamp]);
+
+	}
+}
 
 magnet_mounts = true;
 
@@ -102,7 +179,8 @@ id_idler = id_608; // idler id
 h_idler = h_608; // thickness of idler
 h_idler_washer = h_M8_washer; // idler bearing washer
 w_belt = 6; // width of the belt (not used)
-d_pulley = 16.9; // diameter of the pulley (used to center idler)
+d_pulley = 24.9568; // diameter of the pulley (used to center idler)
+b_pulley = 18.2; // base diameter of the pulley
 
 // guide rod and clamp dims
 cc_guides = 60; // center-to-center of the guide rods
@@ -133,7 +211,7 @@ a_arc_mount = asin(cc_mount / 2 / r_mount_pivot);// angle subtended by arc struc
 a_sep_mounts = 120 - 2 * a_arc_mount; // angle subtended by arc struck between mount pivot points between adjacent apexes
 l_chord_pivots = 2 * r_mount_pivot * sin(a_sep_mounts / 2); // chord length between adjacent mount pivot points
 
-// remove enough material from mount so that a logical length board can be cut to ensure adjacent mount pivot point chord lengths will yield a printer having r_printer
+// remove enough material from mount so that10 a logical length board can be cut to ensure adjacent mount pivot point chord lengths will yield a printer having r_printer
 l_brd = floor(l_chord_pivots / 10) * 10 - l_mount / 2; // length of the board that will be mounted between the apexs to yield r_printer
 //l_brd = l_chord_pivots - l_mount / 2; // length of the board that will be mounted between the apexs to yield r_printer
 l_pad_mount = (l_chord_pivots - l_brd) / 2;
@@ -174,10 +252,10 @@ w_limit_switch = 6;
 t_limit_switch = 14;
 
 // magnetic ball joint dims
-d_ball_bearing = 3 * 25.4 / 8;
-id_magnet = 15 * 25.4 / 64;
-od_magnet = 3 * 25.4 / 8;
-h_magnet = 25.4 / 8;
+d_ball_bearing = 10.319;
+id_magnet = 7;
+od_magnet = 10;
+h_magnet = 3;
 r_bearing_seated = pow(pow(d_ball_bearing / 2, 2) - pow(id_magnet / 2, 2), 0.5); // depth ball bearing sinks into magnet id
 h_carriage_magnet_mount = 9;
 h_effector_magnet_mount = 10;
@@ -508,7 +586,7 @@ module end_motor() {
 					NEMA17_parallel_holes(
 						height = w_clamp - w_idler_relief + 2,
 						l_slot = 0,
-						d_collar = d_pulley);
+						d_collar = b_pulley);
 
 			// set screw access - access from bottom of printer
 			translate([-2.5, -w_clamp / 2 - 1, d_NEMA17_collar / 2 + 0.25])
