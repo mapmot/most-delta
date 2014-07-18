@@ -5,7 +5,16 @@ include <cog.scad>
 include <Triangles.scad>
 include <hotends.scad>
 include <belt_terminator.scad>
+include <belt_pulley.scad>
 
+/*
+				translate([d_pulley / 2, y_web, -t_carriage + 26.7225 + t_carriage / 2])
+					rotate([0, 0, 90])
+						rotate([0, 90, 0])
+							dog_linear(GT2, 5, 13, 5);
+*/
+
+//carriage(dogged=true);
 // [w, l, t] = [y, x, z]
 $fn = 48;
 
@@ -13,79 +22,119 @@ $fn = 48;
 
 //plates(1);
 
-assembly(r_printer-54.4,r_tower_center+0.1);
+
+assembly(
+	apex = true,
+	triangle = true,
+	carriage = false,
+	drive = false
+);
+
+//pulley_and_belt();
+
 
 module idler() {
 		translate([(d_pulley - od_idler) / 2, 0, 0])
-			rotate([90, 0, 0])
-					cylinder(r = od_idler / 2, h = h_idler, center = true);
+			rotate([90, 0, 0]){
+					cylinder(d = od_idler - 2 * t_belt, h = 2 * h_idler, center = true);
+					cylinder(d = d_M8_washer, h = 2 * h_idler + 2 * h_M8_washer, center = true);	
+			}
+}
+
+
+module linking_board() {
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!! MAGIC NUMBER - HELP !!!!!!!!!!!!!!!!!!!!!!!!!!
+	translate([-l_brd / 2, -2 * (r_tower_center - 30.46), -t_clamp/2]) 
+		color("brown") cube([l_brd, w_mount, t_clamp]);
+}
+
+module pulley_and_belt() {
+		rotate([270, 0, 0])
+		translate([0, 0, -9.3])
+		color("red")
+			pulley(belt_profile=p_belt, teeth=t_pulley, retainer=0, idler=0, pulley_t_ht=6.5, pulley_b_ht=9, pulley_b_dia=20);
+		
+		rotate([270, 0, 0])
+		color("orange")
+		belt_system(p_belt, t_pulley, 37, (d_pulley - od_idler)/2, l_belt, w_belt);
 
 }
 
-module pulley() {
-			translate([0, w_idler_relief, (l_NEMA17 - t_clamp) / 2])
-				rotate([90, 0, 0])
-					NEMA17_parallel_holes(
-						height = w_clamp - w_idler_relief + 2,
-						l_slot = 0,
-						d_collar = d_pulley);
+module assembly(
+	apex = true,
+	triangle = true,
+	carriage = true,
+	drive = true
+	)
+{
+	h_printer = l_guide_rods - t_clamp;
 
-}
+	color("white") circle(r_printer);
 
-module belt() {
-	cube([1,6,l_guide_rods]);
-}
+	for (i = [0:2]) rotate([0, 180, i * 120]) {
 
-module assembly(b_printer,a_printer) {
-	echo(str("Imaginary board radius = ", b_printer));
-	echo(str("Imaginary apex radius = ", a_printer));
-	color("blue") circle(r_printer);
-	for (i = [0:2]) {
-			
-		translate([0, a_printer+8, l_guide_rods / 2])
-		translate([-d_pulley / 2, y_web, t_carriage / 2 - d_M3_screw / 2 - 5])
-		rotate([90, 0, 0])
-				terminator(l_pass = 10, flag = 0, mount = 1, magnet=false);
+// Apex
+			if(apex) {
+
+				translate([0, r_tower_center, 0])
+				color("green")
+					end_motor();
+
+
+				translate([0, r_tower_center, -h_printer])
+				color("blue")
+					end_idler();
+			}
+	
+// Linking boards
+			if(triangle) {
+
+				translate([0, r_tower_center, 0])
+					linking_board();
+
+
+				translate([0, r_tower_center, -h_printer])
+					linking_board();
+
+			}
+
+// Carriage			
+
+
+			if(carriage) {
+				
+				
+				translate([0, r_tower_center, ((-h_printer / 2) * sin($t*360)/2 - h_printer / 2)])
+				color("gray")
+					carriage(dogged = true, magnet_mounts = magnet_mounts, stage_mounts = false);
+			}
+
+//Mechanics
+			if(drive) {
+
+				translate([0, r_tower_center, 0])
+					pulley_and_belt();
+
+				translate([0, r_tower_center, -h_printer])
+				color("red")
+					idler();
+
+			}
+
 		
-		rotate([0, 180, i * 120])
-		translate([0, a_printer, -l_guide_rods / 2])
-			carriage(dogged = false, magnet_mounts = magnet_mounts, stage_mounts = false);
-		
-		rotate([0, 180, i * 120])
-		translate([0, a_printer, -t_clamp/2])
-			end_motor();
 
-		rotate([0, 180, i * 120])
-		translate([0, a_printer-15, -t_clamp/2])
-			color("red") pulley();
+// Guide rods
 
-		rotate([0, 180, i * 120])
-		translate([d_pulley/2, a_printer, -t_clamp/2 - l_guide_rods])
-			color("green") belt();
-
-		rotate([0, 180, i * 120])
-		translate([0, a_printer, -t_clamp/2 - l_guide_rods])
-			end_idler();
-		
-		rotate([0, 180, i * 120])
-		translate([0, a_printer, -t_clamp/2 - l_guide_rods])
-			color("red") idler();
-		
-		rotate([0, 180, i * 120])
-		translate([0, a_printer, -t_clamp/2 - l_guide_rods])
+		translate([0, r_tower_center, -t_clamp/2 - h_printer])
 			for (i = [-1, 1])
-				translate([i * cc_guides / 2, 0, 0]) {
-					translate([0, 0, 5])
-						cylinder(d = d_guides, h = l_guide_rods);
+				translate([i * cc_guides / 2, 0, 5]) {
+					translate([0, 0, 0])
+					color("white")
+						cylinder(d = d_guides - 0.2, h = l_guide_rods - 10);
 				}
 
-		rotate([0, 0, i * 120])
-		translate([-l_brd/2,-b_printer,0])
-			cube([l_brd, w_mount, t_clamp]);
 		
-		rotate([0, 0, i * 120])
-		translate([-l_brd/2,-b_printer,l_guide_rods])
-			cube([l_brd, w_mount, t_clamp]);
 
 	}
 }
@@ -169,18 +218,22 @@ module render_part(part_to_render) {
 }
 
 // printer dims
-r_printer = 201.7178; // radius of the printer - typically 175; 203.5 yields exact same geometry with 12" Al rod and 3/8" bearing; effective radius - 203.5:156.5; 204:157; 
-l_tie_rod = 309.51; // length of the tie rods - typically 250; with 12" Al rod + 3/8" bearing = 312.477
-l_guide_rods = 595; // length of the guide rods - only used for assembly
+r_printer = 218.8609; // radius of the printer - typically 175; 203.5 yields exact same geometry with 12" Al rod and 3/8" bearing; effective radius - 203.5:156.5; 204:157; 
+l_tie_rod = 344.13; // length of the tie rods - typically 250; with 12" Al rod + 3/8" bearing = 312.477
+l_guide_rods = 605; // length of the guide rods - only used for assembly
 
 // belt, pulley and idler dims
-od_idler = od_608; // idler OD
+p_belt = GT2_2mm_belt_profile; // belt profile
+l_belt = 1220; // length of the belt in mm
+w_belt = 6; // width of the belt
+t_belt = belt_profile_depth(p_belt); // tooth height of belt - set to 0 for toothed idler (used to center idler)
+od_idler = od_608 + 2 * t_belt;
 id_idler = id_608; // idler id
 h_idler = h_608; // thickness of idler
 h_idler_washer = h_M8_washer; // idler bearing washer
-w_belt = 6; // width of the belt (not used)
-d_pulley = 24.9568; // diameter of the pulley (used to center idler)
-b_pulley = 18.2; // base diameter of the pulley
+t_pulley = 40; // number of teeth in pulley
+d_pulley = pulley_diameter(belt_profile = p_belt, teeth = t_pulley); // diameter of the pulley (used to center idler)
+b_pulley = 10; // base diameter of the pulley
 
 // guide rod and clamp dims
 cc_guides = 60; // center-to-center of the guide rods
@@ -668,7 +721,7 @@ module carriage(
 				translate([d_pulley / 2, y_web, -t_carriage + 26.7225 + t_carriage / 2])
 					rotate([0, 0, 90])
 						rotate([0, 90, 0])
-							dog_linear(T5, 5, 13, 5);
+							dog_linear(GT2, 5, 13, 5);
 
 		}
 
@@ -1351,5 +1404,4 @@ module camera_carriage() {
 		translate([i * cc_guides / 2, -0.35, (l_lm8uu + 0.25) / 2])
 			cube([od_lm8uu, id_lm8uu, 0.25], center = true);
 }
-
 

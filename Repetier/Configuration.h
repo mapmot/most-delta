@@ -122,9 +122,9 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 #if DELTA_DRIVE_TYPE == 0
 /** \brief Pitch in mm of drive belt. GT2 = 2mm */
-#define BELT_PITCH 5
+#define BELT_PITCH 2
 /** \brief Number of teeth on X, Y and Z tower pulleys */
-#define PULLEY_TEETH 12
+#define PULLEY_TEETH 40
 #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
 #elif DELTA_DRIVE_TYPE == 1
 /** \brief Filament pulley diameter in milimeters */
@@ -191,7 +191,7 @@ Overridden if EEPROM activated.*/
 // 100 is AD595
 // 101 is MAX6675
 // 102 is MAX31855
-#define EXT0_TEMPSENSOR_TYPE 97
+#define EXT0_TEMPSENSOR_TYPE 8
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // Which pin enables the heater
@@ -220,7 +220,7 @@ Overridden if EEPROM activated.*/
 - 3 = Dead-time control. PID_P becomes dead-time in seconds.
  Overridden if EEPROM activated.
 */
-#define EXT0_HEAT_MANAGER 0
+#define EXT0_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
 #define EXT0_WATCHPERIOD 1
 
@@ -244,12 +244,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MIN 60
 /** P-gain.  Overridden if EEPROM activated. */
-#define EXT0_PID_P   24
+#define EXT0_PID_P   4.91
 /** I-gain. Overridden if EEPROM activated.
 */
-#define EXT0_PID_I   0.88
+#define EXT0_PID_I   0.58
 /** Dgain.  Overridden if EEPROM activated.*/
-#define EXT0_PID_D 80
+#define EXT0_PID_D 10.41
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
@@ -305,9 +305,6 @@ Set value to 1: Scale PID by EXT0_PID_MAX/256 and then clip to EXT0_PID_MAX.
 If your EXT0_PID_MAX is low, you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
-
-
-#define HEATER_PWM_SPEED 1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz
 
 /** Temperature range for target temperature to hold in M109 command. 5 means +/-5 degC
 
@@ -429,11 +426,11 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED false
+#define HAVE_HEATED_BED true
 
 #define HEATED_BED_MAX_TEMP 115
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
-#define SKIP_M190_IF_WITHIN 3
+#define SKIP_M190_IF_WITHIN 10
 
 // Select type of your heated bed. It's the same as for EXT0_TEMPSENSOR_TYPE
 // set to 0 if you don't have a heated bed
@@ -452,7 +449,7 @@ Heat manager for heated bed:
 2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relay-driven beds to save life time
 3 = dead time control
 */
-#define HEATED_BED_HEAT_MANAGER 1
+#define HEATED_BED_HEAT_MANAGER 2
 /** \brief The maximum value, I-gain can contribute to the output.
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.
@@ -477,7 +474,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
-#define MAXTEMP 260
+#define MAXTEMP 285
 
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
@@ -561,7 +558,7 @@ on this endstop.
 // If during homing the endstop is reached, ho many mm should the printer move back for the second try
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
-#define ENDSTOP_Z_BACK_MOVE 2
+#define ENDSTOP_Z_BACK_MOVE 5
 
 // For higher precision you can reduce the speed for the second test on the endstop
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
@@ -586,7 +583,7 @@ on this endstop.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
 #define X_MAX_LENGTH 200
 #define Y_MAX_LENGTH 200
-#define Z_MAX_LENGTH 247
+#define Z_MAX_LENGTH 147
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
@@ -617,7 +614,7 @@ on this endstop.
 #if DRIVE_SYSTEM==3
 /** \brief Delta rod length
 */
-#define DELTA_DIAGONAL_ROD 250 // mm
+#define DELTA_DIAGONAL_ROD 344.13 // mm
 
 
 /*  =========== Parameter essential for delta calibration ===================
@@ -654,20 +651,20 @@ on this endstop.
 #define DELTA_DIAGONAL_CORRECTION_C 0
 
 /** Max. radius the printer should be able to reach. */
-#define DELTA_MAX_RADIUS 200
+#define DELTA_MAX_RADIUS 150
 
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
-#define END_EFFECTOR_HORIZONTAL_OFFSET 25.8771
+#define END_EFFECTOR_HORIZONTAL_OFFSET 29
 
 /** \brief Horizontal offset of the universal joints on the vertical carriages.
 */
-#define CARRIAGE_HORIZONTAL_OFFSET 20
+#define CARRIAGE_HORIZONTAL_OFFSET 18
 
 /** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
 */
-#define PRINTER_RADIUS 175
+#define PRINTER_RADIUS 218.861
 
 /** Remove comment for more precise delta moves. Needs a bit more computation time. */
 //#define EXACT_DELTA_MOVES
@@ -843,7 +840,7 @@ is at least molten. After havong some complains that the extruder does not work,
 it 0 as default.
 */
 
-#define MIN_EXTRUDER_TEMP 160
+#define MIN_EXTRUDER_TEMP 0
 
 /** \brief Enable advance algorithm.
 
@@ -932,7 +929,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 0
+#define EEPROM_MODE 1
 
 
 /**************** duplicate motor driver ***************
@@ -1037,7 +1034,7 @@ is always running and is not hung up for some unknown reason. */
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR true
+#define SD_EXTENDED_DIR false
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT true
 
@@ -1051,7 +1048,7 @@ is always running and is not hung up for some unknown reason. */
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL false
+#define FEATURE_FAN_CONTROL true
 
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so
@@ -1137,7 +1134,7 @@ same setting.
 /** \brief Lowest repeat time. */
 #define UI_KEY_MIN_REPEAT 50
 
-#define FEATURE_BEEPER true
+#define FEATURE_BEEPER false
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.
